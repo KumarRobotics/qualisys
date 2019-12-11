@@ -10,6 +10,7 @@
 #include <ros/node_handle.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include <qualisys/Subject.h>
 #include <qualisys/RTProtocol.h>
@@ -77,6 +78,7 @@ class QualisysDriver{
 
     // Publishers
     std::map<std::string, ros::Publisher> subject_publishers;
+    std::map<std::string, ros::Publisher> pose_publishers;
     tf::TransformBroadcaster tf_publisher;
 
     // If publish tf msgs
