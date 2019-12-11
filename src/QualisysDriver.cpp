@@ -61,17 +61,22 @@ void QualisysDriver::checkPublishers(const int& body_count) {
     // Create a publisher for the rigid body
     // if it does not have one.
     if (subject_publishers.find(name) ==
-          subject_publishers.end())
+          subject_publishers.end()) {
       subject_publishers[name] =
         nh.advertise<qualisys::Subject>(name, 10);
+      pose_publishers[name] =
+        nh.advertise<geometry_msgs::PoseStamped>(name + "/pose", 10);
+	}
 
     subject_indicator[name] = true;
   }
 
   for (auto it = subject_indicator.begin();
       it != subject_indicator.end(); ++it) {
-    if (it->second == false)
+    if (it->second == false) {
       subject_publishers.erase(it->first);
+      pose_publishers.erase(it->first);
+    }
   }
 
   return;
@@ -136,6 +141,17 @@ void QualisysDriver::handlePacketData(CRTPacket* prt_packet) {
     subject_msg.orientation =
         geom_stamped_transform.transform.rotation;
     subject_publishers[subject_name].publish(subject_msg);
+
+	geometry_msgs::PoseStamped pose_msg;
+	pose_msg.header = geom_stamped_transform.header;
+	pose_msg.pose.position.x = geom_stamped_transform.transform.translation.x;
+	pose_msg.pose.position.y = geom_stamped_transform.transform.translation.y;
+	pose_msg.pose.position.z = geom_stamped_transform.transform.translation.z;
+	pose_msg.pose.orientation.x = geom_stamped_transform.transform.rotation.x;
+	pose_msg.pose.orientation.y = geom_stamped_transform.transform.rotation.y;
+	pose_msg.pose.orientation.z = geom_stamped_transform.transform.rotation.z;
+	pose_msg.pose.orientation.w = geom_stamped_transform.transform.rotation.w;
+    pose_publishers[subject_name].publish(pose_msg);
   }
 
   return;
